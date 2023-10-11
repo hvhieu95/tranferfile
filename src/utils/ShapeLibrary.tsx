@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React from "react";
 import { DraggableItem } from "../components/Generals/DraggableItem";
-import { ShapeType } from '../contexts/DraggableContext';
+import { ShapeType } from "../contexts/DraggableContext";
 
 type Shape = {
   id: number;
@@ -8,36 +8,35 @@ type Shape = {
 };
 
 const shapes: Shape[] = [
-  { id: 1, type: 'circle' },
-  { id: 2, type: 'rectangle' },
-  { id: 3, type: 'vector' },
+  { id: 1, type: "circle" },
+  { id: 2, type: "rectangle" },
+  { id: 3, type: "vector" },
 ];
 
 const ShapeLibrary: React.FC = () => {
-  const [dragging, setDragging] = useState(false);
-
-  const handleDragStart = () => {
-    setDragging(true);
-  };
-
-  const handleDragEnd = () => {
-    setDragging(false);
+  const handleDragStart = (e: React.DragEvent, type: ShapeType, id: number) => {
+    e.dataTransfer.setData("type", type);
+    e.dataTransfer.setData("source", "library");
+    e.dataTransfer.setData("id", id.toString());
   };
 
   return (
     <div>
-    {shapes.map((shape, index) => (
-      <DraggableItem 
-        key={shape.id} 
-        id={index} 
-        type={shape.type} 
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
-        
-      />
-    ))}
-  </div>
+      {shapes.map((shape) => ( 
+        <div 
+          draggable 
+          onDragStart={(e) => handleDragStart(e, shape.type, shape.id)} 
+          key={shape.id}
+        >
+          <DraggableItem 
+            id={shape.id} 
+            type={shape.type} 
+          />
+        </div>
+      ))}
+    </div>
   );
 };
+
 
 export default ShapeLibrary;

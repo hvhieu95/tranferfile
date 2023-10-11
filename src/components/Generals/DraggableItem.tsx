@@ -1,36 +1,15 @@
 import React from "react";
-import { DraggableEvent, DraggableData } from "react-draggable";
 import { ShapeType } from "../../contexts/DraggableContext";
 
 type DraggableItemProps = {
   type: ShapeType;
   id: number;
-  onDragStart?: () => void;
-  onDragEnd?: () => void;
   style?: React.CSSProperties;
 };
-export const DraggableItem = ({
-  type,
-  onDragStart,
-  onDragEnd,
-  style,
-  id,
-}: DraggableItemProps) => {
-  const handleDragStart = (e: React.DragEvent) => {
-    e.dataTransfer.setData("type", type);
-    e.dataTransfer.setData("source", type === "circle" || type === "rectangle" ? "library" : "canvas");
-    e.dataTransfer.setData("id", id.toString());
-    if (onDragStart) onDragStart();
-  };
 
-
-
+export const DraggableItem = ({ type, style, id }: DraggableItemProps) => {
   return (
-    <div
-    
-      onDragStart={handleDragStart}
-      style={style}
-    >
+    <div style={style}>
       {type === "circle" && (
         <div
           style={{
