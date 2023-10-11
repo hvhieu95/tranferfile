@@ -1,15 +1,105 @@
-body, html, #root, .h-100 {
-  height: 100%;
+.shape {
+  margin: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 10px;
 }
-/* App.css */
-.rounded-circle {
-  width: 100px;
-  height: 100px;
-  background-color: lightblue;
+
+.circle, .rectangle, .triangle, .hexagon, .diamond, .parallelogram {
+  margin: 5px;
+}
+
+.circle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid black;
+  background-color: transparent;
 }
 
 .rectangle {
-  width: 150px;
-  height: 100px;
-  background-color: lightgreen;
+  width: 60px;
+  height: 30px;
+  border: 1px solid black;
+ 
+}
+
+.triangle {
+  width: 0;
+  height: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-bottom: 43px solid black;
+  background-color: transparent;
+}
+
+.hexagon {
+  width: 50px;
+  height: 30px;
+  background-color: transparent;
+  position: relative;
+  margin-top: 15px;
+}
+
+.hexagon:before,
+.hexagon:after {
+  content: "";
+  position: absolute;
+  width: 0;
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+}
+
+.hexagon:before {
+  top: -15px;
+  border-bottom: 15px solid black;
+}
+
+.hexagon:after {
+  bottom: -15px;
+  border-top: 15px solid black;
+}
+
+.diamond {
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  transform: rotate(45deg);
+  border: 1px solid black;
+}
+
+.parallelogram {
+  width: 60px;
+  height: 30px;
+  transform: skew(20deg);
+  background-color: transparent;
+  border: 1px solid black;
+}
+#element:before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 16px solid #fff;
+  top: -15px;
+  left: 27px;
+  z-index: 5;
+}
+
+#element:after {
+  content: "";
+  display: block;
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 16px solid transparent;
+  border-right: 16px solid transparent;
+  border-bottom: 16px solid #bbb;
+  top: -16px;
+  left: 27px;
 }

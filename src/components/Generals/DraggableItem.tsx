@@ -4,27 +4,23 @@ import { ShapeType } from "../../contexts/DraggableContext";
 type DraggableItemProps = {
   type: ShapeType;
   id: number;
+  isSelected: boolean;
   style?: React.CSSProperties;
 };
 
-export const DraggableItem = ({ type, style, id }: DraggableItemProps) => {
+export const DraggableItem = ({ type, isSelected, id, style }: DraggableItemProps) => {
+  const styles = {
+    border: isSelected ? "1px dashed black" : "none"
+  };
+
   return (
-    <div style={style}>
-      {type === "circle" && (
-        <div
-          style={{
-            width: "50px",
-            height: "50px",
-            borderRadius: "50%",
-            border: "1px solid black",
-          }}
-        ></div>
-      )}
-      {type === "rectangle" && (
-        <div
-          style={{ width: "50px", height: "30px", border: "1px solid black" }}
-        ></div>
-      )}
+    <div style={{ ...style, ...styles }} className="shape">
+      {type === "circle" && <div className="circle"></div>}
+      {type === "rectangle" && <div className="rectangle"></div>}
+      {type === "triangle" && <div className="triangle"></div>}
+      {type === "hexagon" && <div className="hexagon"></div>}
+      {type === "diamond" && <div className="diamond"></div>}
+      {type === "parallelogram" && <div className="parallelogram"></div>}
     </div>
   );
 };

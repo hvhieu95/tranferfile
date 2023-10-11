@@ -1,28 +1,38 @@
 import React, { createContext, useState, useContext } from "react";
 
-export type ShapeType = "circle" | "rectangle" | "vector";
+export type ShapeType =
+  | "circle"
+  | "rectangle"
+  | "vector"
+  | "triangle"
+  | "hexagon"
+  | "diamond"
+  | "parallelogram";
 
 type CanvasItem = {
   type: ShapeType;
   id: number;
   position: { x: number; y: number };
+  isSelected: boolean;
 };
 
 type DraggableContextType = {
   canvasItems: CanvasItem[];
   addItemToCanvas: (
-    item: { type: ShapeType; id: number },
+    item: { type: ShapeType; id: number; isSelected: boolean },
     position: { x: number; y: number }
   ) => void;
   positions: { [key: string]: { x: number; y: number } };
   handleStop: (id: string, position: { x: number; y: number }) => void;
+  undoCanvasAction: () => void; 
 };
 
 const defaultContextValue: DraggableContextType = {
   canvasItems: [],
-  addItemToCanvas: () => {},
+  addItemToCanvas: () => { },
   positions: {},
-  handleStop: () => {},
+  handleStop: () => { },
+  undoCanvasAction: () => {}
 };
 
 export const DraggableContext =
@@ -37,15 +47,21 @@ export const DraggableProvider = ({ children }: DraggableProviderProps) => {
   const [positions, setPositions] = useState<{
     [key: string]: { x: number; y: number };
   }>({});
-
+  const [canvasHistory, setCanvasHistory] = useState<CanvasItem[][]>([]);
   const addItemToCanvas = (
-    item: { type: ShapeType; id: number },
+    item: { type: ShapeType; id: number; isSelected: boolean },
     position: { x: number; y: number }
   ) => {
     const newItem: CanvasItem = { ...item, position };
     setCanvasItems((prevItems) => [...prevItems, newItem]);
+    setCanvasHistory([...canvasHistory, canvasItems]);
   };
-
+  const undoCanvasAction = () => {
+    if (canvasHistory.length > 0) {
+      setCanvasItems(canvasHistory[canvasHistory.length - 1]);
+      setCanvasHistory(canvasHistory.slice(0, -1));
+    }
+  };
   const handleStop = (id: string, position: { x: number; y: number }) => {
     setPositions((prevPositions) => ({ ...prevPositions, [id]: position }));
   };
@@ -56,8 +72,8 @@ export const DraggableProvider = ({ children }: DraggableProviderProps) => {
         canvasItems,
         addItemToCanvas,
         positions,
-
         handleStop,
+        undoCanvasAction,
       }}
     >
       {children}
