@@ -8,7 +8,7 @@ export const Canvas = () => {
   const { canvasItems: initialCanvasItems, addItemToCanvas,undoCanvasAction  } = useDraggable();
   const [canvasItems, setCanvasItems] = useState(initialCanvasItems);
   const [selectedShapeId, setSelectedShapeId] = useState<number | null>(null);
-
+  // Xử lý khi thả hình vào Canvas
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const type = e.dataTransfer.getData("type") as ShapeType;
@@ -22,11 +22,11 @@ export const Canvas = () => {
       addItemToCanvas({ type, id: Date.now(), isSelected: false }, position);
     }
   };
-
+  // Cho phép kéo hình trên Canvas
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
   };
-
+  // Cập nhật vị trí của hình trên Canvas
   const updateItemPosition = (
     id: number,
     newPosition: { x: number; y: number }
@@ -40,11 +40,11 @@ export const Canvas = () => {
       });
     });
   };
-
+  // Cập nhật danh sách hình khi có thay đổi
   useEffect(() => {
     setCanvasItems(initialCanvasItems);
   }, [initialCanvasItems]);
-
+  // Xử lý sự kiện nhấn phím
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Delete" && selectedShapeId !== null) {
