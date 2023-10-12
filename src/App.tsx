@@ -1,7 +1,7 @@
 import React from "react";
 import { DraggableProvider } from "./contexts/DraggableContext";
-import { Canvas } from "./components/Canvas";
-import ShapeLibrary from "./utils/ShapeLibrary";
+import { Canvas } from "./components/Canvas/Canvas";
+import ShapeLibrary from "./components/ShapeLibrary/ShapeLibrary";
 import "./App.css";
 
 

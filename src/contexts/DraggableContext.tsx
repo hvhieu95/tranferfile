@@ -14,6 +14,7 @@ type CanvasItem = {
   id: number;
   position: { x: number; y: number };
   isSelected: boolean;
+  text?: string;
 };
 
 type DraggableContextType = {
@@ -22,6 +23,7 @@ type DraggableContextType = {
     item: { type: ShapeType; id: number; isSelected: boolean },
     position: { x: number; y: number }
   ) => void;
+  updateItemText: (id: number, newText: string) => void;
   positions: { [key: string]: { x: number; y: number } };
   handleStop: (id: string, position: { x: number; y: number }) => void;
   undoCanvasAction: () => void; 
@@ -30,6 +32,7 @@ type DraggableContextType = {
 const defaultContextValue: DraggableContextType = {
   canvasItems: [],
   addItemToCanvas: () => { },
+  updateItemText: () => { },
   positions: {},
   handleStop: () => { },
   undoCanvasAction: () => {}
@@ -48,20 +51,34 @@ export const DraggableProvider = ({ children }: DraggableProviderProps) => {
     [key: string]: { x: number; y: number };
   }>({});
   const [canvasHistory, setCanvasHistory] = useState<CanvasItem[][]>([]);
+
   const addItemToCanvas = (
     item: { type: ShapeType; id: number; isSelected: boolean },
     position: { x: number; y: number }
   ) => {
-    const newItem: CanvasItem = { ...item, position };
+    const newItem: CanvasItem = { ...item, position, text: "" };
     setCanvasItems((prevItems) => [...prevItems, newItem]);
     setCanvasHistory([...canvasHistory, canvasItems]);
   };
+
+  const updateItemText = (id: number, newText: string) => {
+    setCanvasItems((prevItems) => {
+      return prevItems.map((item) => {
+        if (item.id === id) {
+          return { ...item, text: newText };
+        }
+        return item;
+      });
+    });
+  };
+
   const undoCanvasAction = () => {
     if (canvasHistory.length > 0) {
       setCanvasItems(canvasHistory[canvasHistory.length - 1]);
       setCanvasHistory(canvasHistory.slice(0, -1));
     }
   };
+
   const handleStop = (id: string, position: { x: number; y: number }) => {
     setPositions((prevPositions) => ({ ...prevPositions, [id]: position }));
   };
@@ -71,6 +88,7 @@ export const DraggableProvider = ({ children }: DraggableProviderProps) => {
       value={{
         canvasItems,
         addItemToCanvas,
+        updateItemText,
         positions,
         handleStop,
         undoCanvasAction,

@@ -6,6 +6,7 @@
   justify-content: center;
   cursor: pointer;
   font-size: 10px;
+  position: relative;
 }
 
 .circle, .rectangle, .triangle, .hexagon, .diamond, .parallelogram {
@@ -34,7 +35,9 @@
   border-right: 25px solid transparent;
   border-bottom: 43px solid black;
   background-color: transparent;
+
 }
+
 
 .hexagon {
   width: 50px;
