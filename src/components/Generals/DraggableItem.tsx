@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 import { ShapeType } from "../../contexts/DraggableContext";
 import { useDraggable } from "../../contexts/DraggableContext";
+import { Resizable } from "react-resizable";
+import "react-resizable/css/styles.css";
 
 type DraggableItemProps = {
   type: ShapeType;
@@ -21,6 +23,23 @@ export const DraggableItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
 
+  const initialDimensions = () => {
+    switch (type) {
+      case "circle":
+        return { width: 40, height: 40 };
+      case "rectangle":
+        return { width: 60, height: 30 };
+        case "hexagon":
+          return { width: 50, height: 50 };
+          case "diamond":
+            return { width: 40, height: 40 };
+            case "parallelogram":
+              return { width: 60, height: 30 };
+      default:
+        return { width: 60, height: 60 };
+    }
+  };
+  const [dimensions, setDimensions] = useState(initialDimensions());
   useEffect(() => {
     if (isEditing && textRef.current) {
       textRef.current.focus();
@@ -45,35 +64,70 @@ export const DraggableItem = ({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    width: dimensions.width,
+    height: dimensions.height,
   };
-
+  const shapeStyles = {
+    width: dimensions.width,
+    height: dimensions.height,
+  };
   return (
-    <div
-      style={styles}
-      className="shape-container"
-      onClick={() => setIsEditing(false)}
-      onDoubleClick={() => setIsEditing(true)}
+    <Resizable
+      width={dimensions.width}
+      height={dimensions.height}
+      onResize={(event, { size }) => {
+        setDimensions({
+          width: size.width,
+          height: size.height,
+        });
+      }}
+      resizeHandles={
+        isSelected ? ["e", "w", "s", "n", "se", "sw", "ne", "nw"] : []
+      }
+      axis="both"
     >
-      {type === "circle" && <div className="circle"></div>}
-      {type === "rectangle" && <div className="rectangle"></div>}
-      {type === "triangle" && <div className="triangle"></div>}
-      {type === "hexagon" && <div className="hexagon"></div>}
-      {type === "diamond" && <div className="diamond"></div>}
-      {type === "parallelogram" && <div className="parallelogram"></div>}
       <div
-        ref={textRef}
-        contentEditable={isEditing}
-        onBlur={handleTextBlur}
-        onKeyDown={handleKeyDown}
-        style={{
-          outline: "none",
-          cursor: "text",
-          textAlign: "center",
-          position: "absolute",
-        }}
+        style={styles}
+        className="shape-container"
+        onClick={() => setIsEditing(false)}
+        onDoubleClick={() => setIsEditing(true)}
       >
-        {text}
+        {type === "circle" && (
+          <div className="circle" style={shapeStyles}></div>
+        )}
+        {type === "rectangle" && (
+          <div className="rectangle" style={shapeStyles}></div>
+        )}
+        {type === "triangle" && (
+          <div className="triangle" style={shapeStyles}></div>
+        )}
+        {type === "hexagon" && (
+          <div className="hexagon" style={shapeStyles}></div>
+        )}
+        {type === "diamond" && (
+          <div className="diamond" style={shapeStyles}></div>
+        )}
+        {type === "parallelogram" && (
+          <div className="parallelogram" style={shapeStyles}></div>
+        )}
+        <div
+          ref={textRef}
+          contentEditable={isEditing}
+          onBlur={handleTextBlur}
+          onKeyDown={handleKeyDown}
+          style={{
+            outline: "none",
+            cursor: "text",
+            textAlign: "center",
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+          }}
+        >
+          {text}
+        </div>
       </div>
-    </div>
+    </Resizable>
   );
 };

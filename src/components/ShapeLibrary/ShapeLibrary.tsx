@@ -26,9 +26,10 @@ const ShapeLibrary: React.FC = () => {
   };
 
   return (
-    <div className="d-flex flex-wrap">
+  <div className="shape-library-container">
       {shapes.map((shape) => (
         <div
+        className="shape-library-item"
           draggable
           onDragStart={(e) => handleDragStart(e, shape.type, shape.id)}
           key={shape.id}
