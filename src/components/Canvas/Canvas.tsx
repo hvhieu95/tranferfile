@@ -3,9 +3,10 @@ import { DraggableItem } from "../Generals/DraggableItem";
 import { ShapeType } from "../../contexts/DraggableContext";
 import Draggable from "react-draggable";
 import { useState, useEffect } from "react";
+import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 
-export const Canvas = () => {
-  const { canvasItems: initialCanvasItems, addItemToCanvas,undoCanvasAction  } = useDraggable();
+ export const Canvas = () => {
+  const { canvasItems: initialCanvasItems, addItemToCanvas, undoCanvasAction, uri } = useDraggable();
   const [canvasItems, setCanvasItems] = useState(initialCanvasItems);
   const [selectedShapeId, setSelectedShapeId] = useState<number | null>(null);
   // Xử lý khi thả hình vào Canvas
@@ -25,6 +26,7 @@ export const Canvas = () => {
   // Cho phép kéo hình trên Canvas
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
+    
   };
   // Cập nhật vị trí của hình trên Canvas
   const updateItemPosition = (
@@ -62,16 +64,19 @@ export const Canvas = () => {
   }, [selectedShapeId,undoCanvasAction]);
 
   return (
+    
     <div
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onClick={() => setSelectedShapeId(null)}
       style={{
         border: "1px solid black",
-        minHeight: "900px",
+        minHeight: "98vh",
         position: "relative",
       }}
     >
+  
+      
       {canvasItems.map((item) => (
         <Draggable
           key={item.id}
@@ -96,6 +101,28 @@ export const Canvas = () => {
           </div>
         </Draggable>
       ))}
+         {uri !=='' && (
+        <div className="pdf" style={{height: "98vh", width: "100%", overflow: 'hidden'}}>
+          <DocViewer 
+            documents={[{ 
+              uri: uri,
+              fileType: uri.substring(uri.length - 6).split('.').pop(),
+              fileName: "remote " + uri.substring(uri.length - 6).split('.').pop() + " file"
+            }]} 
+            pluginRenderers={DocViewerRenderers}
+            theme={{
+              primary: "#5296d8",
+              secondary: "#ffffff",
+              tertiary: "#5296d899",
+              textPrimary: "#ffffff",
+              textSecondary: "#5296d8",
+              textTertiary: "#00000099",
+              disableThemeScrollbar: true,
+            }}
+          />
+        </div>
+      )}
+
     </div>
   );
 };

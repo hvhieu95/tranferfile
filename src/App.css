@@ -11,11 +11,13 @@
 /* Thêm vào App.css hoặc một file CSS khác */
 
 .shape-library-container {
+  height: 300px;
+  
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  justify-content: center; 
-  padding: 20px;
+  justify-content: flex-start; 
+  /* padding: 20px; */
 }
 
 .shape-library-item {
@@ -121,4 +123,8 @@
   border-bottom: 16px solid #bbb;
   top: -16px;
   left: 27px;
+}
+
+.pdf{
+  pointer-events: none;
 }

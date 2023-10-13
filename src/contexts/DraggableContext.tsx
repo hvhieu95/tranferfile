@@ -26,7 +26,10 @@ type DraggableContextType = {
   updateItemText: (id: number, newText: string) => void;
   positions: { [key: string]: { x: number; y: number } };
   handleStop: (id: string, position: { x: number; y: number }) => void;
-  undoCanvasAction: () => void; 
+  undoCanvasAction: () => void;
+  updateUri: (path: string) => void;
+  uri: string;
+  clearUri: () => void;
 };
 
 const defaultContextValue: DraggableContextType = {
@@ -35,7 +38,10 @@ const defaultContextValue: DraggableContextType = {
   updateItemText: () => { },
   positions: {},
   handleStop: () => { },
-  undoCanvasAction: () => {}
+  undoCanvasAction: () => {},
+  updateUri: () =>{},
+  uri: '',
+  clearUri: () => {}
 };
 
 export const DraggableContext =
@@ -46,6 +52,7 @@ type DraggableProviderProps = {
 };
 
 export const DraggableProvider = ({ children }: DraggableProviderProps) => {
+  const [uri, setUri] = useState<string>('');
   const [canvasItems, setCanvasItems] = useState<CanvasItem[]>([]);
   const [positions, setPositions] = useState<{
     [key: string]: { x: number; y: number };
@@ -83,6 +90,15 @@ export const DraggableProvider = ({ children }: DraggableProviderProps) => {
     setPositions((prevPositions) => ({ ...prevPositions, [id]: position }));
   };
 
+  
+  const updateUri = (path: string) =>{
+    setUri(path);
+  };
+
+  const clearUri = () => {
+    setUri('');
+  }
+
   return (
     <DraggableContext.Provider
       value={{
@@ -92,6 +108,9 @@ export const DraggableProvider = ({ children }: DraggableProviderProps) => {
         positions,
         handleStop,
         undoCanvasAction,
+        updateUri,
+        uri,
+        clearUri
       }}
     >
       {children}
