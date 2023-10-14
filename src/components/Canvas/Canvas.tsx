@@ -1,52 +1,124 @@
+import React, { useCallback, useEffect, useState } from "react";
 import { useDraggable } from "../../contexts/DraggableContext";
+import Draggable from "react-draggable";
+import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 import { DraggableItem } from "../Generals/DraggableItem";
 import { ShapeType } from "../../contexts/DraggableContext";
-import Draggable from "react-draggable";
-import { useState, useEffect } from "react";
-import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
 
- export const Canvas = () => {
-  const { canvasItems: initialCanvasItems, addItemToCanvas, undoCanvasAction, uri } = useDraggable();
+const DocumentViewer = React.memo(({ uri }: { uri: string }) => {
+  const [isDraggingShape, setIsDraggingShape] = useState(false);
+
+  useEffect(() => {
+    const handleStartDragShape = () => {
+      setIsDraggingShape(true);
+    };
+
+    const handleStopDragShape = () => {
+      setIsDraggingShape(false);
+    };
+
+    window.addEventListener("dragstart", handleStartDragShape);
+    window.addEventListener("dragend", handleStopDragShape);
+
+    return () => {
+      window.removeEventListener("dragstart", handleStartDragShape);
+      window.removeEventListener("dragend", handleStopDragShape);
+    };
+  }, []);
+
+  return (
+    <div
+      className="pdf"
+      style={{
+        height: "98vh",
+        width: "100%",
+        overflow: "hidden",
+        pointerEvents: isDraggingShape ? "none" : "auto",
+      }}
+    >
+      <DocViewer
+        documents={[
+          {
+            uri: uri,
+            fileType: uri
+              .substring(uri.length - 6)
+              .split(".")
+              .pop(),
+            fileName:
+              "remote " +
+              uri
+                .substring(uri.length - 6)
+                .split(".")
+                .pop() +
+              " file",
+          },
+        ]}
+        pluginRenderers={DocViewerRenderers}
+        theme={{
+          primary: "#5296d8",
+          secondary: "#ffffff",
+          tertiary: "#5296d899",
+          textPrimary: "#ffffff",
+          textSecondary: "#5296d8",
+          textTertiary: "#00000099",
+          disableThemeScrollbar: true,
+        }}
+      />
+    </div>
+  );
+});
+
+export const Canvas = () => {
+  const {
+    canvasItems: initialCanvasItems,
+    addItemToCanvas,
+    undoCanvasAction,
+    uri,
+  } = useDraggable();
   const [canvasItems, setCanvasItems] = useState(initialCanvasItems);
   const [selectedShapeId, setSelectedShapeId] = useState<number | null>(null);
-  // Xử lý khi thả hình vào Canvas
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+  const [scrollPosition, setScrollPosition] = useState(0);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent<HTMLDivElement>) => {
+      e.preventDefault();
+      const type = e.dataTransfer.getData("type") as ShapeType;
+      const source = e.dataTransfer.getData("source");
+      const canvasRect = e.currentTarget.getBoundingClientRect();
+      const position = {
+        x: e.clientX - canvasRect.left,
+        y: e.clientY - canvasRect.top + scrollPosition,
+      };
+      if (source === "library") {
+        addItemToCanvas({ type, id: Date.now(), isSelected: false }, position);
+      }
+    },
+    [addItemToCanvas, scrollPosition]
+  );
+
+  const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
-    const type = e.dataTransfer.getData("type") as ShapeType;
-    const source = e.dataTransfer.getData("source");
-    const canvasRect = e.currentTarget.getBoundingClientRect();
-    const position = {
-      x: e.clientX - canvasRect.left,
-      y: e.clientY - canvasRect.top,
-    };
-    if (source === "library") {
-      addItemToCanvas({ type, id: Date.now(), isSelected: false }, position);
-    }
-  };
-  // Cho phép kéo hình trên Canvas
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    
-  };
-  // Cập nhật vị trí của hình trên Canvas
-  const updateItemPosition = (
-    id: number,
-    newPosition: { x: number; y: number }
-  ) => {
-    setCanvasItems((prevItems) => {
-      return prevItems.map((item) => {
-        if (item.id === id) {
-          return { ...item, position: newPosition };
-        }
-        return item;
-      });
-    });
-  };
-  // Cập nhật danh sách hình khi có thay đổi
+  }, []);
+
   useEffect(() => {
     setCanvasItems(initialCanvasItems);
   }, [initialCanvasItems]);
-  // Xử lý sự kiện nhấn phím
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      setScrollPosition(target.scrollTop);
+    };
+
+    document.querySelector(".pdf")?.addEventListener("scroll", handleScroll);
+
+    return () => {
+      document
+        .querySelector(".pdf")
+        ?.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Delete" && selectedShapeId !== null) {
@@ -61,10 +133,9 @@ import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [selectedShapeId,undoCanvasAction]);
+  }, [selectedShapeId, undoCanvasAction]);
 
   return (
-    
     <div
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -75,17 +146,29 @@ import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
         position: "relative",
       }}
     >
-  
-      
       {canvasItems.map((item) => (
         <Draggable
           key={item.id}
-          position={{ x: item.position.x, y: item.position.y }}
+          position={{ x: item.position.x, y: item.position.y - scrollPosition }}
           onStop={(e, data) => {
-            updateItemPosition(item.id, { x: data.x, y: data.y });
+            setCanvasItems((prevItems) =>
+              prevItems.map((i) =>
+                i.id === item.id
+                  ? {
+                      ...i,
+                      position: { x: data.x, y: data.y + scrollPosition },
+                    }
+                  : i
+              )
+            );
           }}
         >
           <div
+            style={{
+              position: "fixed",
+              top: item.position.y,
+              left: item.position.x,
+            }}
             onClick={(e) => {
               e.stopPropagation();
               setSelectedShapeId(item.id);
@@ -101,28 +184,7 @@ import DocViewer, { DocViewerRenderers } from "@cyntler/react-doc-viewer";
           </div>
         </Draggable>
       ))}
-         {uri !=='' && (
-        <div className="pdf" style={{height: "98vh", width: "100%", overflow: 'hidden'}}>
-          <DocViewer 
-            documents={[{ 
-              uri: uri,
-              fileType: uri.substring(uri.length - 6).split('.').pop(),
-              fileName: "remote " + uri.substring(uri.length - 6).split('.').pop() + " file"
-            }]} 
-            pluginRenderers={DocViewerRenderers}
-            theme={{
-              primary: "#5296d8",
-              secondary: "#ffffff",
-              tertiary: "#5296d899",
-              textPrimary: "#ffffff",
-              textSecondary: "#5296d8",
-              textTertiary: "#00000099",
-              disableThemeScrollbar: true,
-            }}
-          />
-        </div>
-      )}
-
+      <DocumentViewer uri={uri} />
     </div>
   );
 };
