@@ -61,7 +61,6 @@ const DocumentViewer = React.memo(({ uri }: { uri: string }) => {
           textPrimary: "#ffffff",
           textSecondary: "#5296d8",
           textTertiary: "#00000099",
-          disableThemeScrollbar: true,
         }}
       />
     </div>
@@ -77,7 +76,6 @@ export const Canvas = () => {
   } = useDraggable();
   const [canvasItems, setCanvasItems] = useState(initialCanvasItems);
   const [selectedShapeId, setSelectedShapeId] = useState<number | null>(null);
-  const [scrollPosition, setScrollPosition] = useState(0);
 
   const handleDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
@@ -87,13 +85,13 @@ export const Canvas = () => {
       const canvasRect = e.currentTarget.getBoundingClientRect();
       const position = {
         x: e.clientX - canvasRect.left,
-        y: e.clientY - canvasRect.top + scrollPosition,
+        y: e.clientY - canvasRect.top,
       };
       if (source === "library") {
         addItemToCanvas({ type, id: Date.now(), isSelected: false }, position);
       }
     },
-    [addItemToCanvas, scrollPosition]
+    [addItemToCanvas]
   );
 
   const handleDragOver = useCallback((e: React.DragEvent<HTMLDivElement>) => {
@@ -103,21 +101,6 @@ export const Canvas = () => {
   useEffect(() => {
     setCanvasItems(initialCanvasItems);
   }, [initialCanvasItems]);
-
-  useEffect(() => {
-    const handleScroll = (e: Event) => {
-      const target = e.target as HTMLElement;
-      setScrollPosition(target.scrollTop);
-    };
-
-    document.querySelector(".pdf")?.addEventListener("scroll", handleScroll);
-
-    return () => {
-      document
-        .querySelector(".pdf")
-        ?.removeEventListener("scroll", handleScroll);
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -149,14 +132,14 @@ export const Canvas = () => {
       {canvasItems.map((item) => (
         <Draggable
           key={item.id}
-          position={{ x: item.position.x, y: item.position.y - scrollPosition }}
+          position={{ x: item.position.x, y: item.position.y }}
           onStop={(e, data) => {
             setCanvasItems((prevItems) =>
               prevItems.map((i) =>
                 i.id === item.id
                   ? {
                       ...i,
-                      position: { x: data.x, y: data.y + scrollPosition },
+                      position: { x: data.x, y: data.y },
                     }
                   : i
               )
