@@ -124,4 +124,9 @@
   top: -16px;
   left: 27px;
 }
-
+#proxy-renderer{
+  overflow: hidden;
+}
+.pdf{
+  pointer-events: none;
+}
